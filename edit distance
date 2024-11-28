@@ -1,0 +1,51 @@
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+// 計算字符串word1和word2之間的最小Edit Distance
+int minDistance(char* word1, char* word2) {
+    int m = strlen(word1); // 獲取word1的長度
+    int n = strlen(word2); // 獲取word2的長度
+
+    // 動態規劃表，分配空間；m代表word1長度，n代表word2長度
+    int **dp = (int **)malloc((m + 1) * sizeof(int *));
+    for (int i = 0; i <= m; i++) {
+        dp[i] = (int *)malloc((n + 1) * sizeof(int));
+    }
+
+    // 初始化DP表的邊界值
+    // 當word2為空時，word1需要刪除m次
+    for (int i = 0; i <= m; i++) {
+        dp[i][0] = i;
+    }
+    // 當word1為空時，word2需要插入n次
+    for (int j = 0; j <= n; j++) {
+        dp[0][j] = j;
+    }
+
+    // 填充DP表
+    for (int i = 1; i <= m; i++) { // 遍歷word1的每個字符
+        for (int j = 1; j <= n; j++) { // 遍歷word2的每個字符
+            if (word1[i - 1] == word2[j - 1]) { 
+                // 當字符相同時，直接繼承左上角的值
+                dp[i][j] = dp[i - 1][j - 1];
+            } else {
+                // 當字符不同時，取三種操作的最小值加1
+                dp[i][j] = 1 + fmin(fmin(dp[i - 1][j],     // 刪除操作
+                                         dp[i][j - 1]),    // 插入操作
+                                         dp[i - 1][j - 1]); // 替換操作
+            }
+        }
+    }
+
+    int result = dp[m][n]; // 最終結果存儲在dp[m][n]中
+
+    // 釋放動態分配的內存
+    for (int i = 0; i <= m; i++) {
+        free(dp[i]);
+    }
+    free(dp);
+
+    return result; // 返回最小編輯距離
+}
